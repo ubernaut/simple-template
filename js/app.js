@@ -6,7 +6,7 @@ import * as THREE from "three";
 
 //fire up three.js
 
-let camera, scene, renderer;
+let camera, scene, renderer, geometry, material, cube;
 let mesh;
 
 init();

@@ -4,9 +4,9 @@ npm start
 
 publish:
 
-npm run build-gh-pages
+npm run build
 
-git add dist
+git add dist/\* --force
 
 git commit -m "deploy whatever"
 

@@ -1,12 +1,13 @@
 {
   "name": "simple-template",
+  "type": "module",
   "version": "1.0.0",
   "description": "template app",
-  "main": "js/app.js",
+  "default": "index.html",
   "scripts": {
     "test": "",
     "start": "parcel --https index.html",
-    "build-gh-pages": "parcel --public-url '.' index.html"
+    "build": "parcel build index.html --public-url ./"
   },
   "author": "",
   "license": "ISC",
