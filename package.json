@@ -1,0 +1,21 @@
+{
+  "name": "simple-template",
+  "version": "1.0.0",
+  "description": "template app",
+  "main": "js/app.js",
+  "scripts": {
+    "test": "",
+    "start": "parcel --https index.html",
+    "build-gh-pages": "parcel --public-url '.' index.html"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "parcel": "^2.12.0",
+    "three": "^0.166.1"
+  },
+  "devDependencies": {
+    "@parcel/packager-raw-url": "^2.12.0",
+    "@parcel/transformer-webmanifest": "^2.12.0"
+  }
+}
