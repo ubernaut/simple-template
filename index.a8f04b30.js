@@ -142,11 +142,11 @@
       this[globalName] = mainExports;
     }
   }
-})({"lQsD6":[function(require,module,exports) {
+})({"6ZoTR":[function(require,module,exports) {
 var global = arguments[3];
 var HMR_HOST = null;
 var HMR_PORT = null;
-var HMR_SECURE = false;
+var HMR_SECURE = true;
 var HMR_ENV_HASH = "d6ea1d42532a7575";
 var HMR_USE_SSE = false;
 module.bundle.HMR_BUNDLE_ID = "62ba0103a8f04b30";
@@ -589,8 +589,7 @@ var _three = require("three");
 //   registerSW();
 // });
 //fire up three.js
-let camera, scene, renderer;
-let mesh;
+let camera, scene, renderer, geometry, material, cube, mesh;
 init();
 function init() {
     camera = new _three.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 100);
@@ -621,18 +620,17 @@ function animate() {
     cube.rotation.x += 0.005;
     cube.rotation.y += 0.01;
     renderer.render(scene, camera);
-} // // Register the Service Worker
- // async function registerSW() {
- //   if ("serviceWorker" in navigator) {
- //     try {
- //       const sw = navigator.serviceWorker;
- //       await sw.register("js/serviceworker.js");
- //     } catch (e) {
- //       console.log("SW registration failed");
- //       console.log(e);
- //     }
- //   }
- // }
+}
+// Register the Service Worker
+async function registerSW() {
+    if ("serviceWorker" in navigator) try {
+        const sw = navigator.serviceWorker;
+        await sw.register("js/serviceworker.js");
+    } catch (e) {
+        console.log("SW registration failed");
+        console.log(e);
+    }
+}
 
 },{"three":"ktPTu"}],"ktPTu":[function(require,module,exports) {
 /**
@@ -32021,6 +32019,6 @@ exports.export = function(dest, destName, get) {
     });
 };
 
-},{}]},["lQsD6","5AKj5"], "5AKj5", "parcelRequirefec6")
+},{}]},["6ZoTR","5AKj5"], "5AKj5", "parcelRequirefec6")
 
 //# sourceMappingURL=index.a8f04b30.js.map
