@@ -1,71 +1,129 @@
-import * as THREE from "three";
-import { VRButton } from "three/examples/jsm/webxr/VRButton.js";
-import { BoxLineGeometry } from "three/examples/jsm/geometries/BoxLineGeometry.js";
+import * as THREE from 'three';
+			import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+			import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
+			import { XRControllerModelFactory } from 'three/examples/jsm/webxr/XRControllerModelFactory.js';
+			import { XRHandModelFactory } from 'three/examples/jsm/webxr/XRHandModelFactory.js';
 
-// window.addEventListener("load", () => {
-//   registerSW();
-// });
+			let container;
+			let camera, scene, renderer;
+			let hand1, hand2;
+			let controller1, controller2;
+			let controllerGrip1, controllerGrip2;
 
-//fire up three.js
+			let controls;
 
-let camera, scene, renderer, geometry, material, cube;
-let mesh;
+			init();
 
-init();
+			function init() {
 
-function init() {
-  camera = new THREE.PerspectiveCamera(
-    90,
-    window.innerWidth / window.innerHeight,
-    0.1,
-    100,
-  );
-  camera.position.z = 2;
+				container = document.createElement( 'div' );
+				document.body.appendChild( container );
 
-  scene = new THREE.Scene();
+				scene = new THREE.Scene();
+				scene.background = new THREE.Color( 0x444444 );
 
-  geometry = new THREE.BoxGeometry(1, 1, 1);
-  material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-  cube = new THREE.Mesh(geometry, material);
-  scene.add(cube);
+				camera = new THREE.PerspectiveCamera( 50, window.innerWidth / window.innerHeight, 0.1, 10 );
+				camera.position.set( 0, 1.6, 3 );
 
-  renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setPixelRatio(window.devicePixelRatio);
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setAnimationLoop(animate);
-  renderer.xr.enabled = true
-  const button = VRButton.createButton(renderer);
-  document.body.appendChild(button);
-  document.body.appendChild(renderer.domElement);
+				controls = new OrbitControls( camera, container );
+				controls.target.set( 0, 1.6, 0 );
+				controls.update();
 
-  //
+				const floorGeometry = new THREE.PlaneGeometry( 4, 4 );
+				const floorMaterial = new THREE.MeshStandardMaterial( { color: 0x666666 } );
+				const floor = new THREE.Mesh( floorGeometry, floorMaterial );
+				floor.rotation.x = - Math.PI / 2;
+				floor.receiveShadow = true;
+				scene.add( floor );
 
-  window.addEventListener("resize", onWindowResize);
-}
+				scene.add( new THREE.HemisphereLight( 0xbcbcbc, 0xa5a5a5, 3 ) );
 
-function onWindowResize() {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
+				const light = new THREE.DirectionalLight( 0xffffff, 3 );
+				light.position.set( 0, 6, 0 );
+				light.castShadow = true;
+				light.shadow.camera.top = 2;
+				light.shadow.camera.bottom = - 2;
+				light.shadow.camera.right = 2;
+				light.shadow.camera.left = - 2;
+				light.shadow.mapSize.set( 4096, 4096 );
+				scene.add( light );
 
-  renderer.setSize(window.innerWidth, window.innerHeight);
-}
+				//
 
-function animate() {
-  cube.rotation.x += 0.005;
-  cube.rotation.y += 0.01;
+				renderer = new THREE.WebGLRenderer( { antialias: true } );
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				renderer.setAnimationLoop( animate );
+				renderer.shadowMap.enabled = true;
+				renderer.xr.enabled = true;
 
-  renderer.render(scene, camera);
-}
+				container.appendChild( renderer.domElement );
 
-// // Register the Service Worker
-// async function registerSW() {
-//   if ("serviceWorker" in navigator) {
-//     try {
-//       const sw = navigator.serviceWorker;
-//       await sw.register("js/serviceworker.js");
-//     } catch (e) {
-//       console.log("SW registration failed");
-//       console.log(e);
-//     }
-//   }
-// }
+				const sessionInit = {
+					requiredFeatures: [ 'hand-tracking' ]
+				};
+
+				document.body.appendChild( VRButton.createButton( renderer, sessionInit ) );
+
+				// controllers
+
+				controller1 = renderer.xr.getController( 0 );
+				scene.add( controller1 );
+
+				controller2 = renderer.xr.getController( 1 );
+				scene.add( controller2 );
+
+				const controllerModelFactory = new XRControllerModelFactory();
+				const handModelFactory = new XRHandModelFactory();
+
+				// Hand 1
+				controllerGrip1 = renderer.xr.getControllerGrip( 0 );
+				controllerGrip1.add( controllerModelFactory.createControllerModel( controllerGrip1 ) );
+				scene.add( controllerGrip1 );
+
+				hand1 = renderer.xr.getHand( 0 );
+				hand1.add( handModelFactory.createHandModel( hand1 ) );
+
+				scene.add( hand1 );
+
+				// Hand 2
+				controllerGrip2 = renderer.xr.getControllerGrip( 1 );
+				controllerGrip2.add( controllerModelFactory.createControllerModel( controllerGrip2 ) );
+				scene.add( controllerGrip2 );
+
+				hand2 = renderer.xr.getHand( 1 );
+				hand2.add( handModelFactory.createHandModel( hand2 ) );
+				scene.add( hand2 );
+
+				//
+
+				const geometry = new THREE.BufferGeometry().setFromPoints( [ new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, - 1 ) ] );
+
+				const line = new THREE.Line( geometry );
+				line.name = 'line';
+				line.scale.z = 5;
+
+				controller1.add( line.clone() );
+				controller2.add( line.clone() );
+
+				//
+
+				window.addEventListener( 'resize', onWindowResize );
+
+			}
+
+			function onWindowResize() {
+
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+			}
+			//
+
+			function animate() {
+
+				renderer.render( scene, camera );
+
+			}
