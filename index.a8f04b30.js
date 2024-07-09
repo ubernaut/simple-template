@@ -585,11 +585,14 @@ function hmrAccept(bundle /*: ParcelRequire */ , id /*: string */ ) {
 
 },{}],"5AKj5":[function(require,module,exports) {
 var _three = require("three");
+var _vrbuttonJs = require("three/examples/jsm/webxr/VRButton.js");
+var _boxLineGeometryJs = require("three/examples/jsm/geometries/BoxLineGeometry.js");
 // window.addEventListener("load", () => {
 //   registerSW();
 // });
 //fire up three.js
-let camera, scene, renderer, geometry, material, cube, mesh;
+let camera, scene, renderer, geometry, material, cube;
+let mesh;
 init();
 function init() {
     camera = new _three.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 100);
@@ -620,19 +623,20 @@ function animate() {
     cube.rotation.x += 0.005;
     cube.rotation.y += 0.01;
     renderer.render(scene, camera);
-}
-// Register the Service Worker
-async function registerSW() {
-    if ("serviceWorker" in navigator) try {
-        const sw = navigator.serviceWorker;
-        await sw.register("js/serviceworker.js");
-    } catch (e) {
-        console.log("SW registration failed");
-        console.log(e);
-    }
-}
+} // // Register the Service Worker
+ // async function registerSW() {
+ //   if ("serviceWorker" in navigator) {
+ //     try {
+ //       const sw = navigator.serviceWorker;
+ //       await sw.register("js/serviceworker.js");
+ //     } catch (e) {
+ //       console.log("SW registration failed");
+ //       console.log(e);
+ //     }
+ //   }
+ // }
 
-},{"three":"ktPTu"}],"ktPTu":[function(require,module,exports) {
+},{"three":"ktPTu","three/examples/jsm/webxr/VRButton.js":"kkyG4","three/examples/jsm/geometries/BoxLineGeometry.js":"5GjcS"}],"ktPTu":[function(require,module,exports) {
 /**
  * @license
  * Copyright 2010-2024 Three.js Authors
@@ -32019,6 +32023,183 @@ exports.export = function(dest, destName, get) {
     });
 };
 
-},{}]},["6ZoTR","5AKj5"], "5AKj5", "parcelRequirefec6")
+},{}],"kkyG4":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "VRButton", ()=>VRButton);
+class VRButton {
+    static createButton(renderer, sessionInit = {}) {
+        const button = document.createElement("button");
+        function showEnterVR() {
+            let currentSession = null;
+            async function onSessionStarted(session) {
+                session.addEventListener("end", onSessionEnded);
+                await renderer.xr.setSession(session);
+                button.textContent = "EXIT VR";
+                currentSession = session;
+            }
+            function onSessionEnded() {
+                currentSession.removeEventListener("end", onSessionEnded);
+                button.textContent = "ENTER VR";
+                currentSession = null;
+            }
+            //
+            button.style.display = "";
+            button.style.cursor = "pointer";
+            button.style.left = "calc(50% - 50px)";
+            button.style.width = "100px";
+            button.textContent = "ENTER VR";
+            // WebXR's requestReferenceSpace only works if the corresponding feature
+            // was requested at session creation time. For simplicity, just ask for
+            // the interesting ones as optional features, but be aware that the
+            // requestReferenceSpace call will fail if it turns out to be unavailable.
+            // ('local' is always available for immersive sessions and doesn't need to
+            // be requested separately.)
+            const sessionOptions = {
+                ...sessionInit,
+                optionalFeatures: [
+                    "local-floor",
+                    "bounded-floor",
+                    "layers",
+                    ...sessionInit.optionalFeatures || []
+                ]
+            };
+            button.onmouseenter = function() {
+                button.style.opacity = "1.0";
+            };
+            button.onmouseleave = function() {
+                button.style.opacity = "0.5";
+            };
+            button.onclick = function() {
+                if (currentSession === null) navigator.xr.requestSession("immersive-vr", sessionOptions).then(onSessionStarted);
+                else {
+                    currentSession.end();
+                    if (navigator.xr.offerSession !== undefined) navigator.xr.offerSession("immersive-vr", sessionOptions).then(onSessionStarted).catch((err)=>{
+                        console.warn(err);
+                    });
+                }
+            };
+            if (navigator.xr.offerSession !== undefined) navigator.xr.offerSession("immersive-vr", sessionOptions).then(onSessionStarted).catch((err)=>{
+                console.warn(err);
+            });
+        }
+        function disableButton() {
+            button.style.display = "";
+            button.style.cursor = "auto";
+            button.style.left = "calc(50% - 75px)";
+            button.style.width = "150px";
+            button.onmouseenter = null;
+            button.onmouseleave = null;
+            button.onclick = null;
+        }
+        function showWebXRNotFound() {
+            disableButton();
+            button.textContent = "VR NOT SUPPORTED";
+        }
+        function showVRNotAllowed(exception) {
+            disableButton();
+            console.warn("Exception when trying to call xr.isSessionSupported", exception);
+            button.textContent = "VR NOT ALLOWED";
+        }
+        function stylizeElement(element) {
+            element.style.position = "absolute";
+            element.style.bottom = "20px";
+            element.style.padding = "12px 6px";
+            element.style.border = "1px solid #fff";
+            element.style.borderRadius = "4px";
+            element.style.background = "rgba(0,0,0,0.1)";
+            element.style.color = "#fff";
+            element.style.font = "normal 13px sans-serif";
+            element.style.textAlign = "center";
+            element.style.opacity = "0.5";
+            element.style.outline = "none";
+            element.style.zIndex = "999";
+        }
+        if ("xr" in navigator) {
+            button.id = "VRButton";
+            button.style.display = "none";
+            stylizeElement(button);
+            navigator.xr.isSessionSupported("immersive-vr").then(function(supported) {
+                supported ? showEnterVR() : showWebXRNotFound();
+                if (supported && VRButton.xrSessionIsGranted) button.click();
+            }).catch(showVRNotAllowed);
+            return button;
+        } else {
+            const message = document.createElement("a");
+            if (window.isSecureContext === false) {
+                message.href = document.location.href.replace(/^http:/, "https:");
+                message.innerHTML = "WEBXR NEEDS HTTPS"; // TODO Improve message
+            } else {
+                message.href = "https://immersiveweb.dev/";
+                message.innerHTML = "WEBXR NOT AVAILABLE";
+            }
+            message.style.left = "calc(50% - 90px)";
+            message.style.width = "180px";
+            message.style.textDecoration = "none";
+            stylizeElement(message);
+            return message;
+        }
+    }
+    static registerSessionGrantedListener() {
+        if (typeof navigator !== "undefined" && "xr" in navigator) {
+            // WebXRViewer (based on Firefox) has a bug where addEventListener
+            // throws a silent exception and aborts execution entirely.
+            if (/WebXRViewer\//i.test(navigator.userAgent)) return;
+            navigator.xr.addEventListener("sessiongranted", ()=>{
+                VRButton.xrSessionIsGranted = true;
+            });
+        }
+    }
+}
+VRButton.xrSessionIsGranted = false;
+VRButton.registerSessionGrantedListener();
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"5GjcS":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "BoxLineGeometry", ()=>BoxLineGeometry);
+var _three = require("three");
+class BoxLineGeometry extends (0, _three.BufferGeometry) {
+    constructor(width = 1, height = 1, depth = 1, widthSegments = 1, heightSegments = 1, depthSegments = 1){
+        super();
+        widthSegments = Math.floor(widthSegments);
+        heightSegments = Math.floor(heightSegments);
+        depthSegments = Math.floor(depthSegments);
+        const widthHalf = width / 2;
+        const heightHalf = height / 2;
+        const depthHalf = depth / 2;
+        const segmentWidth = width / widthSegments;
+        const segmentHeight = height / heightSegments;
+        const segmentDepth = depth / depthSegments;
+        const vertices = [];
+        let x = -widthHalf;
+        let y = -heightHalf;
+        let z = -depthHalf;
+        for(let i = 0; i <= widthSegments; i++){
+            vertices.push(x, -heightHalf, -depthHalf, x, heightHalf, -depthHalf);
+            vertices.push(x, heightHalf, -depthHalf, x, heightHalf, depthHalf);
+            vertices.push(x, heightHalf, depthHalf, x, -heightHalf, depthHalf);
+            vertices.push(x, -heightHalf, depthHalf, x, -heightHalf, -depthHalf);
+            x += segmentWidth;
+        }
+        for(let i = 0; i <= heightSegments; i++){
+            vertices.push(-widthHalf, y, -depthHalf, widthHalf, y, -depthHalf);
+            vertices.push(widthHalf, y, -depthHalf, widthHalf, y, depthHalf);
+            vertices.push(widthHalf, y, depthHalf, -widthHalf, y, depthHalf);
+            vertices.push(-widthHalf, y, depthHalf, -widthHalf, y, -depthHalf);
+            y += segmentHeight;
+        }
+        for(let i = 0; i <= depthSegments; i++){
+            vertices.push(-widthHalf, -heightHalf, z, -widthHalf, heightHalf, z);
+            vertices.push(-widthHalf, heightHalf, z, widthHalf, heightHalf, z);
+            vertices.push(widthHalf, heightHalf, z, widthHalf, -heightHalf, z);
+            vertices.push(widthHalf, -heightHalf, z, -widthHalf, -heightHalf, z);
+            z += segmentDepth;
+        }
+        this.setAttribute("position", new (0, _three.Float32BufferAttribute)(vertices, 3));
+    }
+}
+
+},{"three":"ktPTu","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}]},["6ZoTR","5AKj5"], "5AKj5", "parcelRequirefec6")
 
 //# sourceMappingURL=index.a8f04b30.js.map
