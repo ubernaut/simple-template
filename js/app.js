@@ -1,4 +1,6 @@
 import * as THREE from "three";
+import { VRButton } from "three/examples/jsm/webxr/VRButton.js";
+import { BoxLineGeometry } from "three/examples/jsm/geometries/BoxLineGeometry.js";
 
 // window.addEventListener("load", () => {
 //   registerSW();
@@ -31,6 +33,9 @@ function init() {
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setAnimationLoop(animate);
+  renderer.xr.enabled = true
+  const button = VRButton.createButton(renderer);
+  document.body.appendChild(button);
   document.body.appendChild(renderer.domElement);
 
   //
