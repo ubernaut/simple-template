@@ -12,7 +12,7 @@ let controller1, controller2;
 let controllerGrip1, controllerGrip2;
 let controls;
 let phy;
-
+let floorMaterial;
 init();
 
 function init() {
@@ -35,7 +35,7 @@ function init() {
   controls.update();
 
   // const floorGeometry = new THREE.PlaneGeometry(500, 500);
-  // const floorMaterial = new THREE.MeshStandardMaterial({ color: 0x006600 });
+   const floorMaterial = new THREE.MeshStandardMaterial({ color: 0x006600 });
   // const floor = new THREE.Mesh(floorGeometry, floorMaterial);
   // floor.rotation.x = -Math.PI / 2;
   // floor.receiveShadow = true;
@@ -125,12 +125,14 @@ function init() {
     callback: physicsReady,
   });
 
+
+}
   function physicsReady() {
     phy.set({ substep: 1, gravity: [0, -9.81, 0], fps: 60 });
     phy.add({
       type: "plane",
       size: [300, 1, 300],
-      material: "shadow",
+      material: floorMaterial,
       visible: true,
     });
     let i = 100;
@@ -140,12 +142,10 @@ function init() {
         size: [1, 1, 1],
         pos: [0, 5 + i * 2, 0],
         density: 1,
-        material: material,
+        material: floorMaterial,
         radius: 0.1,
       });
   }
-}
-
 function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
