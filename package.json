@@ -6,8 +6,8 @@
   "default": "index.html",
   "scripts": {
     "test": "",
-    "start": "parcel  --https index.html",
-    "build": "parcel build index.html --public-url /simple-template/"
+    "start": "export stpath='./'; parcel --https index.html",
+    "build": "export stpath='/simple-template/'; parcel build index.html --public-url /simple-template/"
   },
   "author": "",
   "license": "ISC",

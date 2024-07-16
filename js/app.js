@@ -122,8 +122,8 @@ function init() {
     scene: scene,
     renderer: renderer,
     callback: physicsReady,
-    path: './'
-    //path: '${publicUrl}'
+    //path: './'
+    path: process.env.stpath
   });
 
 
