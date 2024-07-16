@@ -11,7 +11,6 @@ let hand1, hand2;
 let controller1, controller2;
 let controllerGrip1, controllerGrip2;
 let controls;
-let phy;
 let floorMaterial;
 init();
 
@@ -117,12 +116,13 @@ function init() {
   window.addEventListener("resize", onWindowResize);
 
   phy.init({
-    type: "oimo",
+    type: "physx",
     worker: true,
     compact: true,
     scene: scene,
     renderer: renderer,
     callback: physicsReady,
+    path: './'
   });
 
 
@@ -139,11 +139,11 @@ function init() {
     while (i--)
       phy.add({
         type: "box",
-        size: [1, 1, 1],
-        pos: [0, 5 + i * 2, 0],
+        size: [1, 2, 3],
+        pos: [0, 5 + i * 4, -10],
         density: 1,
         material: floorMaterial,
-        radius: 0.1,
+        radius: 0.1,        
       });
   }
 function onWindowResize() {
