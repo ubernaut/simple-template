@@ -679,7 +679,7 @@ function init() {
         scene: scene,
         renderer: renderer,
         callback: physicsReady,
-        path: "/simple-template/"
+        path: "./"
     });
 }
 function physicsReady() {
