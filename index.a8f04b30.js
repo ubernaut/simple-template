@@ -596,7 +596,6 @@ let hand1, hand2;
 let controller1, controller2;
 let controllerGrip1, controllerGrip2;
 let controls;
-let phy;
 let floorMaterial;
 init();
 function init() {
