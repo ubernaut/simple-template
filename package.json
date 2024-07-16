@@ -6,8 +6,8 @@
   "default": "index.html",
   "scripts": {
     "test": "",
-    "start": "parcel --https index.html",
-    "build": "parcel build index.html --public-url ./"
+    "start": "parcel  --https index.html",
+    "build": "parcel build index.html --public-url /simple-template/"
   },
   "author": "",
   "license": "ISC",

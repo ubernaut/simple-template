@@ -123,6 +123,7 @@ function init() {
     renderer: renderer,
     callback: physicsReady,
     path: './'
+    //path: '${publicUrl}'
   });
 
 
