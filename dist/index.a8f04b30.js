@@ -673,12 +673,13 @@ function init() {
     controller2.add(line.clone());
     window.addEventListener("resize", onWindowResize);
     (0, _phyEngine.phy).init({
-        type: "oimo",
+        type: "physx",
         worker: true,
         compact: true,
         scene: scene,
         renderer: renderer,
-        callback: physicsReady
+        callback: physicsReady,
+        path: "./"
     });
 }
 function physicsReady() {
@@ -706,13 +707,13 @@ function physicsReady() {
         type: "box",
         size: [
             1,
-            1,
-            1
+            2,
+            3
         ],
         pos: [
             0,
-            5 + i * 2,
-            0
+            5 + i * 4,
+            -10
         ],
         density: 1,
         material: floorMaterial,
